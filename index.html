@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Founder HQ | Intelligence Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Outfit', sans-serif; background-color: #020617; color: #f8fafc; }
+        .glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body x-data="founderApp()" x-init="init()" class="p-10">
+
+    <div class="max-w-6xl mx-auto">
+        
+        <!-- Header -->
+        <header class="flex justify-between items-center mb-16">
+            <h1 class="text-3xl font-black italic text-indigo-500">Founder HQ</h1>
+            <div class="flex gap-4">
+                <button @click="view = 'architect'" class="bg-indigo-600 px-6 py-2 rounded-xl font-bold text-xs">LAUNCH ARCHITECT</button>
+            </div>
+        </header>
+
+        <!-- MAIN VIEW -->
+        <div x-show="view === 'dash'" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="col-span-2 space-y-6">
+                <div class="glass p-12 rounded-[3rem]">
+                    <h2 class="text-4xl font-black mb-4">Good morning, CEO.</h2>
+                    <p class="text-slate-500 text-lg">Your strategy for today is ready. <span class="text-indigo-400 cursor-pointer underline" @click="view = 'architect'">Re-run Architect</span></p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <template x-for="task in todayTasks">
+                        <div class="bg-white/5 border border-white/5 p-6 rounded-2xl flex gap-4 items-center">
+                            <input type="checkbox" class="h-5 w-5 accent-indigo-500 bg-slate-900 border-none rounded">
+                            <p class="text-sm font-bold text-slate-300" x-text="task"></p>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Strategy Sidebar -->
+            <div class="glass p-8 rounded-[2.5rem]">
+                <h3 class="font-bold text-indigo-400 mb-6 uppercase text-xs tracking-widest">Active Campaign</h3>
+                <div class="space-y-4">
+                    <p class="text-[10px] text-slate-500 font-bold uppercase">Niche</p>
+                    <p class="text-2xl font-black" x-text="niche || 'Not set'"></p>
+                    <hr class="border-white/5">
+                    <p class="text-[10px] text-slate-500 font-bold uppercase">Weekly Goal</p>
+                    <p class="text-2xl font-black" x-text="'$' + (goal || '0')"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ARCHITECT VIEW (The Interview) -->
+        <div x-show="view === 'architect'" x-cloak class="fixed inset-0 z-50 bg-[#020617] flex items-center justify-center p-6">
+            <div class="glass w-full max-w-lg p-12 rounded-[3rem] border-indigo-500/20">
+                <div x-show="qStep === 1">
+                    <h2 class="text-3xl font-black mb-2">What's the niche?</h2>
+                    <p class="text-slate-500 mb-8 text-sm">Who are we finding leads for today?</p>
+                    <input x-model="niche" placeholder="e.g. Med Spas" class="w-full bg-slate-900 border border-white/10 p-5 rounded-2xl mb-6 outline-none focus:border-indigo-500">
+                    <button @click="qStep = 2" class="w-full bg-indigo-500 py-5 rounded-2xl font-black text-xl shadow-xl">NEXT STEP</button>
+                </div>
+
+                <div x-show="qStep === 2" x-cloak>
+                    <h2 class="text-3xl font-black mb-2">What's the revenue goal?</h2>
+                    <p class="text-slate-500 mb-8 text-sm">How much do you want to make this week?</p>
+                    <input x-model="goal" placeholder="e.g. 5000" class="w-full bg-slate-900 border border-white/10 p-5 rounded-2xl mb-6 outline-none focus:border-indigo-500">
+                    <button @click="generatePlan()" class="w-full bg-indigo-500 py-5 rounded-2xl font-black text-xl shadow-xl">FINISH PLAN</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        function founderApp() {
+            return {
+                view: 'architect',
+                qStep: 1,
+                niche: '',
+                goal: '',
+                todayTasks: [],
+
+                init() {
+                    const saved = localStorage.getItem('founder_data');
+                    if(saved) {
+                        const data = JSON.parse(saved);
+                        this.niche = data.niche;
+                        this.goal = data.goal;
+                        this.todayTasks = data.tasks;
+                        this.view = 'dash';
+                    }
+                },
+
+                generatePlan() {
+                    this.todayTasks = [
+                        `Find 10 ${this.niche} owners on LinkedIn`,
+                        `Run 5 free Privacy scans for ${this.niche}`,
+                        `Pitch 2 high-ticket recovery sessions`,
+                        `Collect first payment towards $${this.goal} goal`
+                    ];
+                    localStorage.setItem('founder_data', JSON.stringify({
+                        niche: this.niche,
+                        goal: this.goal,
+                        tasks: this.todayTasks
+                    }));
+                    this.view = 'dash';
+                }
+            }
+        }
+    </script>
+</body>
+</html>
